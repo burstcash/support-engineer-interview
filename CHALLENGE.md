@@ -56,7 +56,7 @@ npm run db:delete-user    # Delete specific user
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15 (App Router), TypeScript, React, Tailwind CSS
+- **Frontend**: Next.js 14 (App Router), TypeScript, React, Tailwind CSS
 - **Backend**: tRPC for type-safe APIs
 - **Database**: SQLite with Drizzle ORM
 - **Auth**: JWT-based sessions
