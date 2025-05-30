@@ -2,7 +2,7 @@
 
 ## Overview
 
-You have been provided with a NextJS TypeScript application that simulates a banking platform. Your goal is to achieve **100% test coverage within 2 hours** while identifying and documenting bugs in the codebase.
+You have been provided with a NextJS TypeScript application that simulates a banking platform. Your goal is to achieve **Maximal test coverage within 2 hours** while identifying and documenting bugs in the codebase.
 
 ## The Application
 
