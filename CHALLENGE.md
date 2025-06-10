@@ -1,8 +1,8 @@
-# SDET Technical Interview Challenge
+# Support Engineer Technical Interview Challenge
 
 ## Overview
 
-You have been provided with a NextJS TypeScript application that simulates a banking platform. Your goal is to achieve **Maximal test coverage within 2 hours** while identifying and documenting bugs in the codebase.
+You have been provided with a NextJS TypeScript banking application that has several reported customer issues. Your goal is to **investigate, document root causes, and resolve as many bugs as possible within 2 hours**. Extra credit will be given for adding tests that verify your fixes.
 
 ## The Application
 
@@ -16,11 +16,14 @@ You have been provided with a NextJS TypeScript application that simulates a ban
 
 ## Your Mission
 
-1. **Set up a testing framework** of your choice (Jest, Vitest, Cypress, Playwright, etc.)
-2. **Write comprehensive tests** covering all functionality
-3. **Achieve maximal code coverage**
-4. **Identify and document bugs** you discover through testing
-5. **Fix the bugs you find**:
+1. **Investigate reported issues** and document root causes
+2. **Fix the identified bugs** with proper solutions
+3. **Write clear documentation** explaining:
+   - What caused each bug
+   - How the fix resolves it
+   - What preventive measures can avoid similar issues
+4. **[Extra Credit] Add tests** to verify your fixes
+5. **Prioritize issues** based on user impact
 
 ## Getting Started
 
@@ -62,47 +65,202 @@ npm run db:delete-user    # Delete specific user
 - **Auth**: JWT-based sessions
 - **Forms**: React Hook Form
 
-## Known Issues
+## Reported Issues
 
-There are **10+ intentional bugs** hidden throughout the codebase. They span various categories:
+Below are customer-reported issues in ticket format. Each requires investigation and resolution.
 
-- Input validation errors
-- Logic bugs (incorrect return values)
-- Race conditions
-- Security vulnerabilities
-- Performance problems
-- Data integrity issues
-- Memory leaks
+### UI Issues
 
-## Testing Focus Areas
+**Ticket UI-101: Dark Mode Text Visibility**
 
-### 1. Authentication Flow
+- **Reporter**: Sarah Chen
+- **Priority**: Medium
+- **Description**: "When using dark mode, the text I type into forms appears white on a white background, making it impossible to see what I'm typing."
+- **Steps to Reproduce**:
+  1. Enable dark mode
+  2. Navigate to any input form
+  3. Start typing
+- **Expected**: Text should be clearly visible against the background
+- **Actual**: Text is white on white background
 
-### 2. Account Operations
+### Validation Issues
 
-### 3. Financial Transactions
+**Ticket VAL-201: Email Validation Problems**
 
-### 4. Security
+- **Reporter**: James Wilson
+- **Priority**: High
+- **Description**: "The system accepts invalid email formats and doesn't handle special cases properly."
+- **Examples**:
+  - Accepts "TEST@example.com" but converts to lowercase without notifying user
+  - No validation for common typos like ".con" instead of ".com"
 
-### 5. Error Handling
+**Ticket VAL-202: Date of Birth Validation**
+
+- **Reporter**: Maria Garcia
+- **Priority**: Critical
+- **Description**: "I accidentally entered my birth date as 2025 and the system accepted it."
+- **Impact**: Potential compliance issues with accepting minors
+
+**Ticket VAL-203: State Code Validation**
+
+- **Reporter**: Alex Thompson
+- **Priority**: Medium
+- **Description**: "The system accepted 'XX' as a valid state code."
+- **Impact**: Address verification issues for banking communications
+
+**Ticket VAL-204: Phone Number Format**
+
+- **Reporter**: John Smith
+- **Priority**: Medium
+- **Description**: "International phone numbers aren't properly validated. The system accepts any string of numbers."
+- **Impact**: Unable to contact customers for important notifications
+
+**Ticket VAL-205: Zero Amount Funding**
+
+- **Reporter**: Lisa Johnson
+- **Priority**: High
+- **Description**: "I was able to submit a funding request for $0.00"
+- **Impact**: Creates unnecessary transaction records
+
+**Ticket VAL-206: Card Number Validation**
+
+- **Reporter**: David Brown
+- **Priority**: Critical
+- **Description**: "System accepts invalid card numbers with wrong lengths"
+- **Impact**: Failed transactions and customer frustration
+
+**Ticket VAL-207: Routing Number Optional**
+
+- **Reporter**: Support Team
+- **Priority**: High
+- **Description**: "Bank transfers are being submitted without routing numbers"
+- **Impact**: Failed ACH transfers
+
+**Ticket VAL-208: Weak Password Requirements**
+
+- **Reporter**: Security Team
+- **Priority**: Critical
+- **Description**: "Password validation only checks length, not complexity"
+- **Impact**: Account security risks
+
+**Ticket VAL-209: Amount Input Issues**
+
+- **Reporter**: Robert Lee
+- **Priority**: Medium
+- **Description**: "System accepts amounts with multiple leading zeros"
+- **Impact**: Confusion in transaction records
+
+**Ticket VAL-210: Card Type Detection**
+
+- **Reporter**: Support Team
+- **Priority**: High
+- **Description**: "Card type validation only checks basic prefixes, missing many valid cards"
+- **Impact**: Valid cards being rejected
+
+### Security Issues
+
+**Ticket SEC-301: SSN Storage**
+
+- **Reporter**: Security Audit Team
+- **Priority**: Critical
+- **Description**: "SSNs are stored in plaintext in the database"
+- **Impact**: Severe privacy and compliance risk
+
+**Ticket SEC-302: Insecure Random Numbers**
+
+- **Reporter**: Security Team
+- **Priority**: High
+- **Description**: "Account numbers generated using Math.random()"
+- **Impact**: Potentially predictable account numbers
+
+**Ticket SEC-303: XSS Vulnerability**
+
+- **Reporter**: Security Audit
+- **Priority**: Critical
+- **Description**: "Unescaped HTML rendering in transaction descriptions"
+- **Impact**: Potential for cross-site scripting attacks
+
+**Ticket SEC-304: Session Management**
+
+- **Reporter**: DevOps Team
+- **Priority**: High
+- **Description**: "Multiple valid sessions per user, no invalidation"
+- **Impact**: Security risk from unauthorized access
+
+### Logic and Performance Issues
+
+**Ticket PERF-401: Account Creation Error**
+
+- **Reporter**: Support Team
+- **Priority**: Critical
+- **Description**: "New accounts show $100 balance when DB operations fail"
+- **Impact**: Incorrect balance displays
+
+**Ticket PERF-402: Logout Issues**
+
+- **Reporter**: QA Team
+- **Priority**: Medium
+- **Description**: "Logout always reports success even when session remains active"
+- **Impact**: Users think they're logged out when they're not
+
+**Ticket PERF-403: Session Expiry**
+
+- **Reporter**: Security Team
+- **Priority**: High
+- **Description**: "Expiring sessions still considered valid until exact expiry time"
+- **Impact**: Security risk near session expiration
+
+**Ticket PERF-404: Transaction Sorting**
+
+- **Reporter**: Jane Doe
+- **Priority**: Medium
+- **Description**: "Transaction order seems random sometimes"
+- **Impact**: Confusion when reviewing transaction history
+
+**Ticket PERF-405: Missing Transactions**
+
+- **Reporter**: Multiple Users
+- **Priority**: Critical
+- **Description**: "Not all transactions appear in history after multiple funding events"
+- **Impact**: Users cannot verify all their transactions
+
+**Ticket PERF-406: Balance Calculation**
+
+- **Reporter**: Finance Team
+- **Priority**: Critical
+- **Description**: "Account balances become incorrect after many transactions"
+- **Impact**: Critical financial discrepancies
+
+**Ticket PERF-407: Performance Degradation**
+
+- **Reporter**: DevOps
+- **Priority**: High
+- **Description**: "System slows down when processing multiple transactions"
+- **Impact**: Poor user experience during peak usage
+
+**Ticket PERF-408: Resource Leak**
+
+- **Reporter**: System Monitoring
+- **Priority**: Critical
+- **Description**: "Database connections remain open"
+- **Impact**: System resource exhaustion
 
 ## Evaluation Criteria
 
 You will be evaluated on:
 
-1. **Test Coverage**: Percentage achieved and quality of tests
-2. **Bug Discovery**: Number and severity of bugs found
-3. **Testing Strategy**: Approach and methodology
-4. **Code Quality**: Clean, maintainable test code
-5. **Understanding**: Can you explain the bugs and their impact?
+1. **Root Cause Analysis**: Depth and accuracy of bug investigation
+2. **Solution Quality**: Effectiveness and robustness of fixes
+3. **Documentation**: Clarity and completeness of explanations
+4. **Prioritization**: Ability to identify and address critical issues first
+5. **Communication**: How well you explain technical issues to different audiences
 
 ## Time Management
 
 - 15 min: Interviewer to walk through the challenge
-- 15 min: Candidate to explore the app and understand functionality
-- 15 min: Candidate to set up testing framework
-- 75 min: Write tests and discover bugs
-- 15 min: Document findings and attempt fixes
+- 15 min: Review reported issues and prioritize
+- 90 min: Investigate and fix bugs
+- 15 min: Document findings and solutions
 - 15 min: Questions about Glide and next steps
 
-Good luck! Remember, the goal is not just coverage but finding real issues that would impact users.
+Good luck! Remember, the goal is to demonstrate your ability to investigate, solve, and clearly explain technical issues.
