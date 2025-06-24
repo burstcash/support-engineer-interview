@@ -126,7 +126,7 @@ Below are customer-reported issues in ticket format. Each requires investigation
 
 - **Reporter**: David Brown
 - **Priority**: Critical
-- **Description**: "System accepts invalid card numbers with wrong lengths"
+- **Description**: "System accepts invalid card numbers"
 - **Impact**: Failed transactions and customer frustration
 
 **Ticket VAL-207: Routing Number Optional**
