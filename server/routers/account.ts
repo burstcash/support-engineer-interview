@@ -165,8 +165,7 @@ export const accountRouter = router({
       const accountTransactions = await db
         .select()
         .from(transactions)
-        .where(eq(transactions.accountId, input.accountId))
-        .orderBy(transactions.createdAt);
+        .where(eq(transactions.accountId, input.accountId));
 
       const enrichedTransactions = [];
       for (const transaction of accountTransactions) {
