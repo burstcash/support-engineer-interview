@@ -81,7 +81,7 @@ conn = sqlite3.connect(self.db_path, check_same_thread=False)
 - **Initialize git repo** only with permission
 - **Ask about uncommitted changes** before starting work
 - **Create WIP branch** if no clear branch exists
-- **Commit frequently** throughout development. Commits should ideally only change 1-3 files and be very incremental. Because a single commit will be small, explain the next few commits that you plan to make when you ask for a commit to be approved.
+- **Commit frequently** throughout development. Commits should ideally only change 1-3 files and be very incremental. For example, after installing a package, make a commit saying what package was installed (and why). Because a single commit will be small, also explain the next few commits that you plan to make.
 - **Verify commit contents match commit messages** before committing
 - **Never skip pre-commit hooks**
 
