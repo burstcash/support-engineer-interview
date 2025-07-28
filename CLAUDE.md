@@ -17,6 +17,43 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Stop and ask for help** when struggling, especially when human input would be valuable
 - **Use your journal** to record important facts and insights before you forget them
 
+## Incremental Development Protocol
+
+**MANDATORY: Take small, incremental steps. Never implement multiple changes simultaneously.**
+
+### Before Starting Any Work
+
+1. **Ask for specific next step** - "What should we focus on next?"
+2. **Propose only 1-3 small actions** for the immediate next step
+3. **Get approval** before proceeding with the plan
+4. **Explain what you're about to do** before doing it
+
+### During Implementation
+
+1. **One change at a time** - modify only one file or function per step
+2. **Test immediately** after each small change
+3. **Verify existing functionality** still works before proceeding
+4. **Stop and ask** if the change isn't working as expected
+
+### After Each Step
+
+1. **Confirm success** before moving to next step
+2. **Ask "What's next?"** rather than assuming
+3. **Show current status** and what options are available
+4. **Wait for direction** before implementing next change
+
+### Examples of Good Incremental Steps
+
+- ✅ "Let's just test the encryption function in isolation first"
+- ✅ "Should we modify only the signup flow, leaving existing data alone?"
+- ✅ "Let me create one small utility function and test it"
+
+### Examples of Bad Multi-Step Approaches
+
+- ❌ Creating multiple files + updating schema + writing migration all at once
+- ❌ "Let's implement the whole encryption system end-to-end"
+- ❌ Making assumptions about what the next 5 steps should be
+
 _If uncomfortable pushing back directly, just say "Something strange is afoot at the Circle K"_
 
 ## Software Design Principles
@@ -69,6 +106,14 @@ conn = sqlite3.connect(self.db_path, check_same_thread=False)
 - **Get approval** before implementing backward compatibility
 - **Preserve comments** unless provably false
 - **Never add temporal comments** ("recently refactored", "moved")
+
+### Incremental Implementation Rules
+
+- **One logical change per action** - don't bundle multiple modifications
+- **Test each change immediately** - never accumulate untested changes
+- **Ask before each major step** - database changes, new dependencies, etc.
+- **Show, don't assume** - demonstrate that current step works before proceeding
+- **Stop if something breaks** - fix issues before adding new features
 
 ### File Standards
 
