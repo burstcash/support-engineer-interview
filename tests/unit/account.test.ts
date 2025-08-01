@@ -4,55 +4,12 @@
 import { describe, it, expect } from 'vitest'
 import { createMockAuthContext, insertTestUser, createTestUser } from '../helpers'
 import { testConnection } from '../setup'
+import { accountRouter } from '@/server/routers/account'
 
 // -- Import and use test database directly
 import { accounts } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 
-// -- Mock account router that uses test database
-const mockAccountRouter = {
-  async createAccount(input: { accountType: 'checking' | 'savings' }, ctx: Record<string, unknown>) {
-    const userCtx = ctx as { user: { id: number } }
-    
-    // Check if user already has an account of this type
-    const existingAccount = await testConnection
-      .select()
-      .from(accounts)
-      .where(and(eq(accounts.userId, userCtx.user.id), eq(accounts.accountType, input.accountType)))
-      .get()
-
-    if (existingAccount) {
-      throw new Error(`You already have a ${input.accountType} account`)
-    }
-
-    // Generate account number
-    const accountNumber = Math.floor(Math.random() * 1000000000)
-      .toString()
-      .padStart(10, "0")
-
-    const [newAccount] = await testConnection
-      .insert(accounts)
-      .values({
-        userId: userCtx.user.id,
-        accountNumber,
-        accountType: input.accountType,
-        balance: 0,
-        status: 'pending',
-      })
-      .returning()
-
-    return newAccount
-  },
-
-  async getAccounts(ctx: Record<string, unknown>) {
-    const userCtx = ctx as { user: { id: number } }
-    return await testConnection
-      .select()
-      .from(accounts)
-      .where(eq(accounts.userId, userCtx.user.id))
-      .all()
-  }
-}
 
 describe('Account Router', () => {
   describe('createAccount', () => {
@@ -62,16 +19,15 @@ describe('Account Router', () => {
       const mockCtx = createMockAuthContext(testUser)
       
       // -- Act: Create checking account
-      const result = await mockAccountRouter.createAccount(
-        { accountType: 'checking' }, 
-        mockCtx
-      )
+      const result = await accountRouter
+        .createCaller(mockCtx)
+        .createAccount({ accountType: 'checking' })
       
       // -- Assert: Verify account creation
       expect(result).toMatchObject({
         accountType: 'checking',
         balance: 0,
-        status: 'pending',
+        status: 'active',
         userId: testUser.id
       })
       expect(result.accountNumber).toMatch(/^\d{10}$/) // Should be 10 digits
@@ -91,7 +47,7 @@ describe('Account Router', () => {
       expect(result).toMatchObject({
         accountType: 'savings',
         balance: 0,
-        status: 'pending',
+        status: 'active',
         userId: testUser.id
       })
     })
