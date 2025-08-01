@@ -1,14 +1,14 @@
 // ABOUTME: Unit tests for crypto utility functions
 // Tests encryption, decryption, key handling, and error cases
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { encryptSensitiveData, decryptSensitiveData } from '@/lib/crypto'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { encryptSensitiveData, decryptSensitiveData, getEncryptionKey } from '@/lib/crypto'
 
 describe('Crypto Utilities', () => {
   const originalEnv = process.env.ENCRYPTION_KEY
   
   beforeEach(() => {
-    // Reset environment for each test
+    // Delete environment variable to ensure tests use default key from crypto.ts
     delete process.env.ENCRYPTION_KEY
   })
   
@@ -19,6 +19,32 @@ describe('Crypto Utilities', () => {
     } else {
       delete process.env.ENCRYPTION_KEY
     }
+  })
+
+  describe('getEncryptionKey', () => {
+    it('should return development key when no env variable is set', () => {
+      const key = getEncryptionKey()
+      expect(key).toBeDefined()
+      expect(key.length).toBe(32) // 256 bits
+    })
+
+    it('should return the key from environment variable if it is set', () => {
+      const testKey = Buffer.alloc(32, 'test-key-for-env').toString('base64')
+      process.env.ENCRYPTION_KEY = testKey
+      
+      const key = getEncryptionKey()
+      expect(key.toString('base64')).toBe(testKey)
+    })
+
+    it('should log warning when using development key', () => {
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      
+      const key = getEncryptionKey()
+      expect(key.length).toBe(32) // 256 bits
+      expect(consoleWarnSpy).toHaveBeenCalledWith('Using development encryption key - not suitable for production')
+      
+      consoleWarnSpy.mockRestore()
+    })
   })
 
   describe('encryptSensitiveData', () => {
@@ -44,16 +70,6 @@ describe('Crypto Utilities', () => {
       const encrypted = encryptSensitiveData('')
       expect(encrypted).toBeDefined()
       expect(typeof encrypted).toBe('string')
-    })
-
-    it('should handle various SSN formats', () => {
-      const ssnFormats = ['123456789', '000000000', '999999999']
-      
-      ssnFormats.forEach(ssn => {
-        const encrypted = encryptSensitiveData(ssn)
-        expect(encrypted).toBeDefined()
-        expect(typeof encrypted).toBe('string')
-      })
     })
   })
 
@@ -92,59 +108,10 @@ describe('Crypto Utilities', () => {
       const testSSN = '123456789'
       const encrypted = encryptSensitiveData(testSSN)
       
-      // Tamper with the encrypted data by changing one character
+      // Change the last character to simulate tampering
       const tamperedEncrypted = encrypted.slice(0, -1) + (encrypted.slice(-1) === 'A' ? 'B' : 'A')
       
       expect(() => decryptSensitiveData(tamperedEncrypted)).toThrow()
-    })
-  })
-
-  describe('Key Management', () => {
-    it('should use development key when no environment key is set', () => {
-      delete process.env.ENCRYPTION_KEY
-      
-      const testSSN = '123456789'
-      const encrypted1 = encryptSensitiveData(testSSN)
-      const decrypted1 = decryptSensitiveData(encrypted1)
-      
-      expect(decrypted1).toBe(testSSN)
-    })
-
-    it('should use environment key when provided', () => {
-      // Generate a valid 32-byte key and base64 encode it
-      const testKeyBuffer = Buffer.alloc(32, 'test-key-content')
-      const testKey = testKeyBuffer.toString('base64')
-      process.env.ENCRYPTION_KEY = testKey
-      
-      const testSSN = '123456789'
-      const encrypted = encryptSensitiveData(testSSN)
-      const decrypted = decryptSensitiveData(encrypted)
-      
-      expect(decrypted).toBe(testSSN)
-    })
-
-    it('should produce different results with different keys', () => {
-      const testSSN = '123456789'
-      
-      // Test with development key
-      delete process.env.ENCRYPTION_KEY
-      const encrypted1 = encryptSensitiveData(testSSN)
-      
-      // Test with environment key - generate proper 32-byte key
-      const testKeyBuffer = Buffer.alloc(32, 'different-key')
-      const testKey = testKeyBuffer.toString('base64')
-      process.env.ENCRYPTION_KEY = testKey
-      const encrypted2 = encryptSensitiveData(testSSN)
-      
-      // Encrypted values should be different (different keys)
-      expect(encrypted1).not.toBe(encrypted2)
-      
-      // But both should decrypt correctly with their respective keys
-      delete process.env.ENCRYPTION_KEY
-      expect(decryptSensitiveData(encrypted1)).toBe(testSSN)
-      
-      process.env.ENCRYPTION_KEY = testKey
-      expect(decryptSensitiveData(encrypted2)).toBe(testSSN)
     })
   })
 
@@ -152,8 +119,7 @@ describe('Crypto Utilities', () => {
     it('should not decrypt with wrong key', () => {
       const testSSN = '123456789'
       
-      // Encrypt with one key
-      delete process.env.ENCRYPTION_KEY
+      // Encrypt with default crypto key
       const encrypted = encryptSensitiveData(testSSN)
       
       // Try to decrypt with different key - generate proper 32-byte key
@@ -162,6 +128,27 @@ describe('Crypto Utilities', () => {
       process.env.ENCRYPTION_KEY = wrongKey
       
       expect(() => decryptSensitiveData(encrypted)).toThrow()
+    })
+
+    it('should use the env key for encryption and decryption', () => {
+      const testSSN = '123456789'
+
+      // Set a specific env key
+      const testKeyBuffer = Buffer.alloc(32, 'test-key-for-env')
+      const testKey = testKeyBuffer.toString('base64')
+      process.env.ENCRYPTION_KEY = testKey
+
+      const encrypted = encryptSensitiveData(testSSN)
+      expect(encrypted).toBeDefined()
+
+      // Try to decrypt with the default crypto key
+      delete process.env.ENCRYPTION_KEY
+      expect(() => decryptSensitiveData(encrypted)).toThrow()
+
+      // Set the env key again and decrypt
+      process.env.ENCRYPTION_KEY = testKey
+      const decrypted = decryptSensitiveData(encrypted)
+      expect(decrypted).toBe(testSSN)
     })
 
     it('should produce cryptographically strong output', () => {

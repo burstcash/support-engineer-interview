@@ -12,7 +12,7 @@ const TAG_LENGTH = 16; // 128 bits
  * Gets the encryption key from environment variable
  * Falls back to a development key for testing (never use in production!)
  */
-function getEncryptionKey(): Buffer {
+export function getEncryptionKey(): Buffer {
   const envKey = process.env.ENCRYPTION_KEY;
   
   if (envKey) {
