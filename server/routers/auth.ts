@@ -128,8 +128,10 @@ export const authRouter = router({
       // Delete session from database
       let token: string | undefined;
       if ("cookies" in ctx.req) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         token = (ctx.req as any).cookies.session;
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const cookieHeader = ctx.req.headers.get?.("cookie") || (ctx.req.headers as any).cookie;
         token = cookieHeader
           ?.split("; ")
