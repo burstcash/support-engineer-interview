@@ -2,13 +2,13 @@
 // Configures in-memory database and shared test utilities
 
 import { beforeAll, afterAll, beforeEach } from 'vitest'
-const Database = require('better-sqlite3')
+import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import * as schema from '@/lib/db/schema'
 
 // -- Create in-memory database for testing
 // -- Avoids conflicts with development database
-let testDb: any
+let testDb: Database.Database
 let testConnection: ReturnType<typeof drizzle<typeof schema>>
 
 beforeAll(async () => {
@@ -92,6 +92,7 @@ async function clearTestDatabase() {
     await testConnection.delete(schema.transactions)
     await testConnection.delete(schema.accounts)
     await testConnection.delete(schema.users)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // Fallback to direct SQL if schema operations fail
     testDb.exec(`
