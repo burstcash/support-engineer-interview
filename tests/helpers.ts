@@ -1,7 +1,7 @@
 // ABOUTME: Test utilities for SecureBank application
 // Provides helper functions for creating test data and mocking authentication
 
-import bcrypt from 'bcryptjs'
+import * as bcrypt from 'bcryptjs'
 import { testConnection } from './setup'
 import { users, accounts, transactions } from '@/lib/db/schema'
 
@@ -107,11 +107,11 @@ export async function insertTestTransaction(accountId: number, transactionData: 
 
 // -- Create mock authentication context
 // -- Simulates authenticated user for tRPC procedure testing
-export function createMockAuthContext(user: Record<string, unknown>) {
+export function createMockAuthContext(user: typeof users.$inferSelect) {
   return {
     user,
-    req: {} as Record<string, unknown>,
-    res: {} as Record<string, unknown>,
+    req: {} as any,
+    res: {} as any,
   }
 }
 

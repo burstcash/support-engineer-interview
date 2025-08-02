@@ -2,19 +2,20 @@
 // Configures in-memory database and shared test utilities
 
 import { beforeAll, afterAll, beforeEach } from 'vitest'
-import Database from 'better-sqlite3'
+const Database = require('better-sqlite3')
 import { drizzle } from 'drizzle-orm/better-sqlite3'
+import * as schema from '@/lib/db/schema'
 
 // -- Create in-memory database for testing
 // -- Avoids conflicts with development database
-let testDb: Database.Database
-let testConnection: ReturnType<typeof drizzle>
+let testDb: any
+let testConnection: ReturnType<typeof drizzle<typeof schema>>
 
 beforeAll(async () => {
   // -- Initialize in-memory SQLite database
   // -- Faster than file-based DB and automatically cleaned up
   testDb = new Database(':memory:')
-  testConnection = drizzle(testDb)
+  testConnection = drizzle(testDb, { schema })
   
   // -- Apply database schema to test database
   // -- Ensures test environment matches production structure
@@ -84,14 +85,22 @@ async function initializeTestDatabase() {
 }
 
 async function clearTestDatabase() {
-  // -- Clear all test data in dependency order
+  // -- Clear all test data in dependency order using Drizzle
   // -- Prevents foreign key constraint violations
-  testDb.exec(`
-    DELETE FROM sessions;
-    DELETE FROM transactions;
-    DELETE FROM accounts;
-    DELETE FROM users;
-  `)
+  try {
+    await testConnection.delete(schema.sessions)
+    await testConnection.delete(schema.transactions)
+    await testConnection.delete(schema.accounts)
+    await testConnection.delete(schema.users)
+  } catch (error) {
+    // Fallback to direct SQL if schema operations fail
+    testDb.exec(`
+      DELETE FROM sessions;
+      DELETE FROM transactions;
+      DELETE FROM accounts;
+      DELETE FROM users;
+    `)
+  }
 }
 
 // -- Export test database connection for use in tests

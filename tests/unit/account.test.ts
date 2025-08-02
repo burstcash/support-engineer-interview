@@ -4,12 +4,7 @@
 import { describe, it, expect } from 'vitest'
 import { createMockAuthContext, insertTestUser, createTestUser } from '../helpers'
 import { testConnection } from '../setup'
-import { accountRouter } from '@/server/routers/account'
-
-// -- Import and use test database directly
-import { accounts } from '@/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
-
+import { createAccountRouter } from '@/server/routers/account'
 
 describe('Account Router', () => {
   describe('createAccount', () => {
@@ -17,6 +12,7 @@ describe('Account Router', () => {
       // -- Arrange: Set up test user and authentication context
       const testUser = await insertTestUser(createTestUser())
       const mockCtx = createMockAuthContext(testUser)
+      const accountRouter = createAccountRouter(testConnection)
       
       // -- Act: Create checking account
       const result = await accountRouter
@@ -37,6 +33,7 @@ describe('Account Router', () => {
       // -- Arrange: Set up test user and authentication context
       const testUser = await insertTestUser(createTestUser())
       const mockCtx = createMockAuthContext(testUser)
+      const accountRouter = createAccountRouter(testConnection)
       
       // -- Act: Create savings account
       const result = await accountRouter
@@ -56,6 +53,7 @@ describe('Account Router', () => {
       // -- Arrange: Set up test user with existing checking account
       const testUser = await insertTestUser(createTestUser())
       const mockCtx = createMockAuthContext(testUser)
+      const accountRouter = createAccountRouter(testConnection)
       
       // Create first checking account
       await accountRouter
@@ -74,6 +72,7 @@ describe('Account Router', () => {
       // -- Arrange: Set up two test users
       const user1 = await insertTestUser(createTestUser({ email: 'user1@example.com' }))
       const user2 = await insertTestUser(createTestUser({ email: 'user2@example.com' }))
+      const accountRouter = createAccountRouter(testConnection)
       
       const ctx1 = createMockAuthContext(user1)
       const ctx2 = createMockAuthContext(user2)
@@ -97,6 +96,7 @@ describe('Account Router', () => {
       // -- Arrange: Set up test user without accounts
       const testUser = await insertTestUser(createTestUser())
       const mockCtx = createMockAuthContext(testUser)
+      const accountRouter = createAccountRouter(testConnection)
       
       // -- Act: Get accounts
       const accounts = await accountRouter
@@ -111,6 +111,7 @@ describe('Account Router', () => {
       // -- Arrange: Set up test user with multiple accounts
       const testUser = await insertTestUser(createTestUser())
       const mockCtx = createMockAuthContext(testUser)
+      const accountRouter = createAccountRouter(testConnection)
       
       // Create checking and savings accounts
       await accountRouter
@@ -136,6 +137,7 @@ describe('Account Router', () => {
       // -- Arrange: Set up two users with accounts
       const user1 = await insertTestUser(createTestUser({ email: 'user1@example.com' }))
       const user2 = await insertTestUser(createTestUser({ email: 'user2@example.com' }))
+      const accountRouter = createAccountRouter(testConnection)
       
       const ctx1 = createMockAuthContext(user1)
       const ctx2 = createMockAuthContext(user2)

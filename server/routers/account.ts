@@ -11,7 +11,9 @@ function generateAccountNumber(): string {
     .padStart(10, "0");
 }
 
-export const accountRouter = router({
+// Factory function that creates account router with specified database connection
+export function createAccountRouter(database = db) {
+  return router({
   createAccount: protectedProcedure
     .input(
       z.object({
@@ -20,7 +22,7 @@ export const accountRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       // Check if user already has an account of this type
-      const existingAccount = await db
+      const existingAccount = await database
         .select()
         .from(accounts)
         .where(and(eq(accounts.userId, ctx.user.id), eq(accounts.accountType, input.accountType)))
@@ -39,11 +41,11 @@ export const accountRouter = router({
       // Generate unique account number
       while (!isUnique) {
         accountNumber = generateAccountNumber();
-        const existing = await db.select().from(accounts).where(eq(accounts.accountNumber, accountNumber)).get();
+        const existing = await database.select().from(accounts).where(eq(accounts.accountNumber, accountNumber)).get();
         isUnique = !existing;
       }
 
-      await db.insert(accounts).values({
+      await database.insert(accounts).values({
         userId: ctx.user.id,
         accountNumber: accountNumber!,
         accountType: input.accountType,
@@ -52,7 +54,7 @@ export const accountRouter = router({
       });
 
       // Fetch the created account
-      const account = await db.select().from(accounts).where(eq(accounts.accountNumber, accountNumber!)).get();
+      const account = await database.select().from(accounts).where(eq(accounts.accountNumber, accountNumber!)).get();
 
       return (
         account || {
@@ -68,7 +70,7 @@ export const accountRouter = router({
     }),
 
   getAccounts: protectedProcedure.query(async ({ ctx }) => {
-    const userAccounts = await db.select().from(accounts).where(eq(accounts.userId, ctx.user.id));
+    const userAccounts = await database.select().from(accounts).where(eq(accounts.userId, ctx.user.id));
 
     return userAccounts;
   }),
@@ -89,7 +91,7 @@ export const accountRouter = router({
       const amount = parseFloat(input.amount.toString());
 
       // Verify account belongs to user
-      const account = await db
+      const account = await database
         .select()
         .from(accounts)
         .where(and(eq(accounts.id, input.accountId), eq(accounts.userId, ctx.user.id)))
@@ -110,7 +112,7 @@ export const accountRouter = router({
       }
 
       // Create transaction
-      await db.insert(transactions).values({
+      await database.insert(transactions).values({
         accountId: input.accountId,
         type: "deposit",
         amount,
@@ -120,10 +122,10 @@ export const accountRouter = router({
       });
 
       // Fetch the created transaction
-      const transaction = await db.select().from(transactions).orderBy(transactions.createdAt).limit(1).get();
+      const transaction = await database.select().from(transactions).orderBy(transactions.createdAt).limit(1).get();
 
       // Update account balance
-      await db
+      await database
         .update(accounts)
         .set({
           balance: account.balance + amount,
@@ -149,7 +151,7 @@ export const accountRouter = router({
     )
     .query(async ({ input, ctx }) => {
       // Verify account belongs to user
-      const account = await db
+      const account = await database
         .select()
         .from(accounts)
         .where(and(eq(accounts.id, input.accountId), eq(accounts.userId, ctx.user.id)))
@@ -162,14 +164,14 @@ export const accountRouter = router({
         });
       }
 
-      const accountTransactions = await db
+      const accountTransactions = await database
         .select()
         .from(transactions)
         .where(eq(transactions.accountId, input.accountId));
 
       const enrichedTransactions = [];
       for (const transaction of accountTransactions) {
-        const accountDetails = await db.select().from(accounts).where(eq(accounts.id, transaction.accountId)).get();
+        const accountDetails = await database.select().from(accounts).where(eq(accounts.id, transaction.accountId)).get();
 
         enrichedTransactions.push({
           ...transaction,
@@ -179,4 +181,8 @@ export const accountRouter = router({
 
       return enrichedTransactions;
     }),
-});
+  })
+}
+
+// Export default router using production database
+export const accountRouter = createAccountRouter();
