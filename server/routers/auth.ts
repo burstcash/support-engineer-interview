@@ -109,6 +109,8 @@ export function createAuthRouter(dbConnection = db) {
         expiresIn: "7d",
       });
 
+      await dbConnection.delete(sessions).where(eq(sessions.userId, user.id)); // Clear existing session
+
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7);
 
