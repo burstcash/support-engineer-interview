@@ -61,6 +61,3 @@ export function initDb() {
     );
   `);
 }
-
-// Initialize database on import
-initDb();
