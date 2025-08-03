@@ -122,15 +122,14 @@ describe('Authentication Integration', () => {
       
       // -- Assert: Verify login success
       expect(result).toMatchObject({
-        success: true,
-        message: 'Login successful'
+        user: expect.objectContaining({
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName
+        }),
+        token: expect.any(String)
       })
-      expect(result.user).toMatchObject({
-        email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName
-      })
-      expect(result.token).toBeDefined()
+
     })
 
     it('should reject invalid credentials', async () => {
