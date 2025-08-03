@@ -14,18 +14,11 @@ let testConnection: ReturnType<typeof drizzle<typeof schema>>
 beforeAll(async () => {
   // -- Initialize in-memory SQLite database
   // -- Faster than file-based DB and automatically cleaned up
-  console.log('SETUP: Initializing test database...')
   testDb = new Database(':memory:')
   testConnection = drizzle(testDb, { schema })
-  
-  // Check if testConnection is different from default db
-  const { db: defaultDb } = await import('@/lib/db')
-  console.log('SETUP: testConnection === defaultDb:', testConnection === defaultDb)
-  
+    
   // -- Apply database schema to test database
-  // -- Ensures test environment matches production structure
   await initializeTestDatabase()
-  console.log('SETUP: Test database initialized')
 })
 
 afterAll(async () => {
