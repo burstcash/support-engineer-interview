@@ -9,13 +9,13 @@ import { users, accounts, transactions } from '@/lib/db/schema'
 // -- Creates consistent test users with valid but fake data
 export function createTestUser(overrides: Partial<TestUser> = {}): TestUser {
   return {
-    email: 'test@example.com',
+    email: 'test1@example.com',
     password: 'SecurePass123!',
     firstName: 'John',
     lastName: 'Doe',
-    phoneNumber: '555-0123',
+    phoneNumber: '0005550123',
     dateOfBirth: '1990-01-01',
-    ssn: '123-45-6789',
+    ssn: '123456789',
     address: '123 Test St',
     city: 'Test City',
     state: 'CA',
@@ -110,7 +110,9 @@ export async function insertTestTransaction(accountId: number, transactionData: 
 export function createMockAuthContext(user: typeof users.$inferSelect) {
   return {
     user,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     req: {} as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     res: {} as any,
   }
 }
