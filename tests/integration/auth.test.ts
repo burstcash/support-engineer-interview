@@ -16,7 +16,8 @@ function createMockContext() {
     user: null,
     req: {},
     res: {
-      setHeader: () => {} // Mock function for setting cookies
+      setHeader: () => {}, // Mock function for setting cookies
+      set: () => {} // Mock function for setting response headers
     }
   }
 }
@@ -42,9 +43,14 @@ describe('Authentication Integration', () => {
       
       // -- Assert: Verify registration success
       expect(result).toMatchObject({
-        success: true,
-        message: 'User registered successfully'
+        user: expect.objectContaining({
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName
+        }),
+        token: expect.any(String)
       })
+      expect(result.user.password).toBeUndefined()
       
       const dbUser = await testConnection
         .select()
@@ -55,6 +61,7 @@ describe('Authentication Integration', () => {
       expect(dbUser).toBeDefined()
       expect(dbUser?.firstName).toBe(userData.firstName)
       expect(dbUser?.lastName).toBe(userData.lastName)
+      
       
       expect(dbUser?.password).not.toBe(userData.password)
       const isPasswordValid = await bcrypt.compare(userData.password, dbUser?.password || '')
@@ -99,8 +106,8 @@ describe('Authentication Integration', () => {
     it('should login with valid credentials', async () => {
       // -- Arrange: Register a user first
       const userData = createTestUser()
-      const mockCtx = { user: null, req: {}, res: {} }
-      
+      const mockCtx = createMockContext()
+
       await authRouter
         .createCaller(mockCtx)
         .signup(userData)
@@ -129,8 +136,8 @@ describe('Authentication Integration', () => {
     it('should reject invalid credentials', async () => {
       // -- Arrange: Register a user
       const userData = createTestUser()
-      const mockCtx = { user: null, req: {}, res: {} }
-      
+      const mockCtx = createMockContext()
+
       await authRouter
         .createCaller(mockCtx)
         .signup(userData)
@@ -148,7 +155,7 @@ describe('Authentication Integration', () => {
 
     it('should reject login for non-existent user', async () => {
       // -- Arrange: Prepare login data for non-existent user
-      const mockCtx = { user: null, req: {}, res: {} }
+      const mockCtx = createMockContext()
       
       // -- Act & Assert: Login with non-existent email
       await expect(
