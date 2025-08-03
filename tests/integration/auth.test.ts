@@ -1,25 +1,39 @@
 // ABOUTME: Integration tests for authentication flow
 // Tests the complete auth router with database interactions
 
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, beforeAll } from 'vitest'
 import bcrypt from 'bcryptjs'
-import { authRouter } from '@/server/routers/auth'
-import { testConnection } from '../setup'
 import { createTestUser } from '../helpers'
 import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
-// -- Mock the database module to use test database
-vi.mock('@/lib/db', () => ({
-  db: testConnection
-}))
+import { testConnection } from '../setup'
+import { createAuthRouter } from '@/server/routers/auth'
+
+// Helper to create mock context with proper response methods
+function createMockContext() {
+  return {
+    user: null,
+    req: {},
+    res: {
+      setHeader: () => {} // Mock function for setting cookies
+    }
+  }
+}
 
 describe('Authentication Integration', () => {
+  let authRouter: ReturnType<typeof createAuthRouter>
+  
+  beforeAll(() => {
+    // Create auth router with test database connection after setup is complete
+    authRouter = createAuthRouter(testConnection)
+  })
+  
   describe('signup', () => {
     it('should register a new user successfully', async () => {
       // -- Arrange: Prepare user registration data
       const userData = createTestUser()
-      const mockCtx = { user: null, req: {}, res: {} }
+      const mockCtx = createMockContext()
       
       // -- Act: Register the user
       const result = await authRouter
@@ -50,7 +64,7 @@ describe('Authentication Integration', () => {
     it('should prevent duplicate email registration', async () => {
       // -- Arrange: Register a user first
       const userData = createTestUser()
-      const mockCtx = { user: null, req: {}, res: {} }
+      const mockCtx = createMockContext()
       
       await authRouter
         .createCaller(mockCtx)

@@ -14,12 +14,18 @@ let testConnection: ReturnType<typeof drizzle<typeof schema>>
 beforeAll(async () => {
   // -- Initialize in-memory SQLite database
   // -- Faster than file-based DB and automatically cleaned up
+  console.log('SETUP: Initializing test database...')
   testDb = new Database(':memory:')
   testConnection = drizzle(testDb, { schema })
+  
+  // Check if testConnection is different from default db
+  const { db: defaultDb } = await import('@/lib/db')
+  console.log('SETUP: testConnection === defaultDb:', testConnection === defaultDb)
   
   // -- Apply database schema to test database
   // -- Ensures test environment matches production structure
   await initializeTestDatabase()
+  console.log('SETUP: Test database initialized')
 })
 
 afterAll(async () => {
@@ -33,6 +39,7 @@ afterAll(async () => {
 beforeEach(async () => {
   // -- Clear all data between tests
   // -- Ensures test isolation and predictable state
+  console.log('SETUP: beforeEach hook running...')
   await clearTestDatabase()
 })
 
@@ -76,8 +83,9 @@ async function initializeTestDatabase() {
     );
     
     CREATE TABLE sessions (
-      id TEXT PRIMARY KEY,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL REFERENCES users(id),
+      token TEXT UNIQUE NOT NULL,
       expires_at TEXT NOT NULL,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
@@ -85,22 +93,21 @@ async function initializeTestDatabase() {
 }
 
 async function clearTestDatabase() {
-  // -- Clear all test data in dependency order using Drizzle
-  // -- Prevents foreign key constraint violations
-  try {
-    await testConnection.delete(schema.sessions)
-    await testConnection.delete(schema.transactions)
-    await testConnection.delete(schema.accounts)
-    await testConnection.delete(schema.users)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    // Fallback to direct SQL if schema operations fail
+  // -- Clear all test data in dependency order using direct SQL
+  // -- More reliable than Drizzle operations for test cleanup
+  console.log('Clearing test database...')
+  if (testDb) {
     testDb.exec(`
       DELETE FROM sessions;
-      DELETE FROM transactions;
+      DELETE FROM transactions;  
       DELETE FROM accounts;
       DELETE FROM users;
     `)
+    // Check if users were actually deleted
+    const userCount = testDb.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number }
+    console.log(`Database cleared successfully. Users remaining: ${userCount.count}`)
+  } else {
+    console.warn('testDb not available for clearing')
   }
 }
 

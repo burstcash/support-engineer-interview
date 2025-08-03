@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { users } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
+import { decryptSensitiveData } from '@/lib/crypto'
 
-// -- Mock the database module to use test database (must be before other imports)
+// -- Mock the database module to use test database
 vi.mock('@/lib/db', async () => {
   const { testConnection } = await import('../setup')
   return {
@@ -8,11 +11,8 @@ vi.mock('@/lib/db', async () => {
   }
 })
 
-import { authRouter } from '@/server/routers/auth'
-import { users } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
-import { decryptSensitiveData } from '@/lib/crypto'
 import { testConnection } from '../setup'
+import { authRouter } from '@/server/routers/auth'
 
 describe('Auth Router - SSN Encryption', () => {
   beforeEach(async () => {
