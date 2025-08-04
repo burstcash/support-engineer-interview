@@ -31,8 +31,6 @@ afterAll(async () => {
 
 beforeEach(async () => {
   // -- Clear all data between tests
-  // -- Ensures test isolation and predictable state
-  console.log('SETUP: beforeEach hook running...')
   await clearTestDatabase()
 })
 

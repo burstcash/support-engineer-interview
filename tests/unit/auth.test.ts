@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest'
 import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { decryptSensitiveData } from '@/lib/crypto'
@@ -12,17 +12,14 @@ vi.mock('@/lib/db', async () => {
 })
 
 import { testConnection } from '../setup'
-import { authRouter } from '@/server/routers/auth'
+import { createAuthRouter } from '@/server/routers/auth'
 
 describe('Auth Router - SSN Encryption', () => {
-  beforeEach(async () => {
-    // Clear users table before each test
-    await testConnection.delete(users)
-  })
+  let authRouter: ReturnType<typeof createAuthRouter>
 
-  afterEach(async () => {
-    // Clean up after each test
-    await testConnection.delete(users)
+  beforeAll(() => {
+    // Create auth router with test database connection after setup is complete
+    authRouter = createAuthRouter(testConnection)
   })
 
   describe('signup mutation', () => {
