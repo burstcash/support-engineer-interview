@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeAll, vi } from 'vitest'
 import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { decryptSensitiveData } from '@/lib/crypto'
@@ -13,6 +13,7 @@ vi.mock('@/lib/db', async () => {
 
 import { testConnection } from '../setup'
 import { createAuthRouter } from '@/server/routers/auth'
+import { createMockContext } from '../helpers'
 
 describe('Auth Router - SSN Encryption', () => {
   let authRouter: ReturnType<typeof createAuthRouter>
@@ -24,14 +25,7 @@ describe('Auth Router - SSN Encryption', () => {
 
   describe('signup mutation', () => {
     it('should encrypt SSN before storing in database', async () => {
-      const mockContext = {
-        res: {
-          setHeader: vi.fn()
-        },
-        req: {},
-        user: null
-      }
-
+      const mockCtx = createMockContext()
       const testUserData = {
         email: 'test@example.com',
         password: 'password123',
@@ -47,7 +41,7 @@ describe('Auth Router - SSN Encryption', () => {
       }
 
       // Execute signup
-      await authRouter.createCaller(mockContext).signup(testUserData)
+      await authRouter.createCaller(mockCtx).signup(testUserData)
 
       // Verify user was created
       const storedUser = await testConnection.select().from(users).where(eq(users.email, testUserData.email)).get()
@@ -63,12 +57,7 @@ describe('Auth Router - SSN Encryption', () => {
     })
 
     it('should handle multiple users with same SSN (different encrypted values)', async () => {
-      const mockContext = {
-        res: { setHeader: vi.fn() },
-        req: {},
-        user: null
-      }
-
+      const mockCtx = createMockContext()
       const userData1 = {
         email: 'user1@example.com',
         password: 'password123',
@@ -91,8 +80,8 @@ describe('Auth Router - SSN Encryption', () => {
       }
 
       // Create both users
-      await authRouter.createCaller(mockContext).signup(userData1)
-      await authRouter.createCaller(mockContext).signup(userData2)
+      await authRouter.createCaller(mockCtx).signup(userData1)
+      await authRouter.createCaller(mockCtx).signup(userData2)
 
       // Get both users from database
       const user1 = await testConnection.select().from(users).where(eq(users.email, userData1.email)).get()

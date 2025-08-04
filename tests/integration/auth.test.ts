@@ -3,24 +3,12 @@
 
 import { describe, it, expect, beforeAll } from 'vitest'
 import bcrypt from 'bcryptjs'
-import { createTestUser } from '../helpers'
+import { createMockContext, createTestUser } from '../helpers'
 import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
 import { testConnection } from '../setup'
 import { createAuthRouter } from '@/server/routers/auth'
-
-// Helper to create mock context with proper response methods
-function createMockContext() {
-  return {
-    user: null,
-    req: {},
-    res: {
-      setHeader: () => {}, // Mock function for setting cookies
-      set: () => {} // Mock function for setting response headers
-    }
-  }
-}
 
 describe('Authentication Integration', () => {
   let authRouter: ReturnType<typeof createAuthRouter>

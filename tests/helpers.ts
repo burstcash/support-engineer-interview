@@ -5,6 +5,17 @@ import * as bcrypt from 'bcryptjs'
 import { testConnection } from './setup'
 import { users, accounts, transactions } from '@/lib/db/schema'
 
+export function createMockContext() {
+  return {
+    user: null,
+    req: {},
+    res: {
+      setHeader: () => {}, // Mock function for setting cookies
+      set: () => {} // Mock function for setting response headers
+    }
+  }
+}
+
 // -- Test user data factory
 // -- Creates consistent test users with valid but fake data
 export function createTestUser(overrides: Partial<TestUser> = {}): TestUser {
