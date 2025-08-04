@@ -6,6 +6,7 @@ import { publicProcedure, router } from "../trpc";
 import { db } from "@/lib/db";
 import { users, sessions } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { encryptSensitiveData } from "@/lib/crypto";
 
 export function createAuthRouter(dbConnection = db) {
   console.log('Creating auth router with dbConnection:', dbConnection === db ? 'DEFAULT DB' : 'CUSTOM DB')
@@ -39,9 +40,11 @@ export function createAuthRouter(dbConnection = db) {
       }
 
       const hashedPassword = await bcrypt.hash(input.password, 10);
+      const encryptedSSN = encryptSensitiveData(input.ssn);
 
       await dbConnection.insert(users).values({
         ...input,
+        ssn: encryptedSSN,
         password: hashedPassword,
       });
 
@@ -76,7 +79,7 @@ export function createAuthRouter(dbConnection = db) {
         (ctx.res as Headers).set("Set-Cookie", `session=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=604800`);
       }
 
-      return { user: { ...user, password: undefined }, token };
+      return { user: { ...user, password: undefined, ssn: undefined }, token };
     }),
 
   login: publicProcedure
@@ -126,7 +129,7 @@ export function createAuthRouter(dbConnection = db) {
         (ctx.res as Headers).set("Set-Cookie", `session=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=604800`);
       }
 
-      return { user: { ...user, password: undefined }, token };
+      return { user: { ...user, password: undefined , ssn: undefined }, token };
     }),
 
   logout: publicProcedure.mutation(async ({ ctx }) => {
