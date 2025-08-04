@@ -44,7 +44,7 @@ describe('Auth Router - SSN Encryption', () => {
       await authRouter.createCaller(mockCtx).signup(testUserData)
 
       // Verify user was created
-      const storedUser = await testConnection.select().from(users).where(eq(users.email, testUserData.email)).get()
+      const storedUser = testConnection.select().from(users).where(eq(users.email, testUserData.email)).get()
       expect(storedUser).toBeDefined()
 
       // Critical test: SSN should be encrypted in database
@@ -84,8 +84,8 @@ describe('Auth Router - SSN Encryption', () => {
       await authRouter.createCaller(mockCtx).signup(userData2)
 
       // Get both users from database
-      const user1 = await testConnection.select().from(users).where(eq(users.email, userData1.email)).get()
-      const user2 = await testConnection.select().from(users).where(eq(users.email, userData2.email)).get()
+      const user1 = testConnection.select().from(users).where(eq(users.email, userData1.email)).get()
+      const user2 = testConnection.select().from(users).where(eq(users.email, userData2.email)).get()
 
       // SSNs should be encrypted differently (random IV)
       expect(user1!.ssn).not.toBe(user2!.ssn)
