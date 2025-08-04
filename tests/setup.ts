@@ -86,7 +86,6 @@ async function initializeTestDatabase() {
 async function clearTestDatabase() {
   // -- Clear all test data in dependency order using direct SQL
   // -- More reliable than Drizzle operations for test cleanup
-  console.log('Clearing test database...')
   if (testDb) {
     testDb.exec(`
       DELETE FROM sessions;
@@ -94,9 +93,6 @@ async function clearTestDatabase() {
       DELETE FROM accounts;
       DELETE FROM users;
     `)
-    // Check if users were actually deleted
-    const userCount = testDb.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number }
-    console.log(`Database cleared successfully. Users remaining: ${userCount.count}`)
   } else {
     console.warn('testDb not available for clearing')
   }
