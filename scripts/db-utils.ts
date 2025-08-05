@@ -4,6 +4,7 @@ import { join } from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { decryptSensitiveData, encryptSensitiveData } from '../lib/crypto'
+import * as readline from 'readline';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -43,6 +44,7 @@ if (command === "list-users") {
       console.log(`ID: ${user.id}, Email: ${user.email}, Name: ${user.first_name} ${user.last_name}`);
     });
   }
+  db.close();
 } else if (command === "list-sessions") {
   console.log("\n=== Current Sessions ===");
   const sessions = db
@@ -64,6 +66,7 @@ if (command === "list-users") {
       console.log("---");
     });
   }
+  db.close();
 } else if (command === "clear") {
   console.log("\n=== Clearing Database ===");
   db.exec("DELETE FROM sessions");
@@ -87,18 +90,32 @@ if (command === "list-users") {
       console.log(`User ${email} not found`);
     }
   }
-} else if (command === "migrate-ssns" && options) {
-  console.log("\n=== Migrating SSNs ===");
-  const users = db.prepare("SELECT id, ssn FROM users").all() as User[];
-  users.forEach((user) => {
-    if (user.ssn && isPlaintextSSN(user)) {
-      const encryptedSSN = encryptSensitiveData(user.ssn);
-      db.prepare("UPDATE users SET ssn = ? WHERE id = ?").run(encryptedSSN, user.id);
-      console.log(`User ${user.id}: SSN migrated`);
-      const storedSSN = db.prepare("SELECT ssn FROM users WHERE id = ?").get(user.id) as { ssn: string };
-      console.log(`User ${user.id}: Stored Encrypted SSN: ${storedSSN.ssn}`);
-    }
-  });
+  db.close();
+} else if (command === "migrate-ssns") {
+  if (options.length === 0) {
+    console.warn("⚠️  WARNING: No database file specified. This will migrate the main bank.db file!");
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+    rl.question('Press Enter to continue or type "no" to cancel: ', (answer) => {
+      if (answer.trim().toLowerCase() === 'no' || answer.trim().toLowerCase() === 'n') {
+        console.log("Migration cancelled.");
+        rl.close();
+        db.close();
+        return;
+      }
+      // Empty string (just Enter pressed) or anything else continues
+      console.log("\n=== Migrating SSNs ===");
+      performSSNMigration();
+      rl.close();
+      db.close();
+    });    
+  } else {
+    console.log(`\n=== Migrating SSNs in ${options[0]} ===`);
+    performSSNMigration();
+    db.close();
+  }
 } else if (command === "backup-db") {
   const backupPath = join(__dirname, "..", "backup.db"); // hardcoded to avoid validation
   if (existsSync(backupPath)) {
@@ -106,6 +123,7 @@ if (command === "list-users") {
   }
   copyFileSync(dbPath, backupPath);
   console.log(`Database backup created at ${backupPath}`);
+  db.close();
 } else {
   console.log(`
 Database Utilities
@@ -125,6 +143,20 @@ Examples:
   `);
 }
 
+function performSSNMigration() {
+  console.log("Starting SSN migration...");
+  const users = db.prepare("SELECT id, ssn FROM users").all() as User[];
+  users.forEach((user) => {
+    if (user.ssn && isPlaintextSSN(user)) {
+      const encryptedSSN = encryptSensitiveData(user.ssn);
+      db.prepare("UPDATE users SET ssn = ? WHERE id = ?").run(encryptedSSN, user.id);
+      console.log(`User ${user.id}: SSN migrated`);
+      const storedSSN = db.prepare("SELECT ssn FROM users WHERE id = ?").get(user.id) as { ssn: string };
+      console.log(`User ${user.id}: Stored Encrypted SSN: ${storedSSN.ssn}`);
+    }
+  });
+}
+
 function isPlaintextSSN(user: User) {
   if (user.ssn === undefined) {
     return false; // No SSN to migrate
@@ -141,5 +173,3 @@ function isPlaintextSSN(user: User) {
     return false;
   }
 }
-
-db.close();
