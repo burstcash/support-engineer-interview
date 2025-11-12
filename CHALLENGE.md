@@ -4,6 +4,11 @@
 
 You have been provided with a NextJS TypeScript banking application that has several reported customer issues. Your goal is to **investigate, document root causes, and resolve as many bugs as possible within 2 hours**. Extra credit will be given for adding tests that verify your fixes.
 
+## Deliverable
+
+1. Submit your code as a link to a **new, public GitHub Repository under your profile**, or **attach a .zip file of your code**. In either case, submit via an e-mail.
+2. Include your written documentation (described below) in the same e-mail.
+
 ## The Application
 
 **SecureBank** is a modern banking application with the following features:
@@ -16,14 +21,15 @@ You have been provided with a NextJS TypeScript banking application that has sev
 
 ## Your Mission
 
-1. **Investigate reported issues** and document root causes
-2. **Fix the identified bugs** with proper solutions
-3. **Write clear documentation** explaining:
+1. **Clone the repository and install dependencies**
+2. **Investigate reported issues** and document root causes
+3. **Fix the identified bugs** with proper solutions
+4. **Write clear documentation for each bug, and submit this via e-mail,** explaining:
    - What caused each bug
    - How the fix resolves it
    - What preventive measures can avoid similar issues
-4. **[Extra Credit] Add tests** to verify your fixes
-5. **Prioritize issues** based on user impact
+5. **[Extra Credit] Add tests** to verify your fixes
+6. **Prioritize issues** based on user impact
 
 ## Getting Started
 
@@ -249,18 +255,8 @@ Below are customer-reported issues in ticket format. Each requires investigation
 
 You will be evaluated on:
 
-1. **Root Cause Analysis**: Depth and accuracy of bug investigation
-2. **Solution Quality**: Effectiveness and robustness of fixes
-3. **Documentation**: Clarity and completeness of explanations
-4. **Prioritization**: Ability to identify and address critical issues first
-5. **Communication**: How well you explain technical issues to different audiences
-
-## Time Management
-
-- 15 min: Interviewer to walk through the challenge
-- 15 min: Review reported issues and prioritize
-- 90 min: Investigate and fix bugs
-- 15 min: Document findings and solutions
-- 15 min: Questions about Glide and next steps
+1. **Solution Quality**: Effectiveness and robustness of fixes
+2. **Documentation**: Clarity and completeness of explanations
+3. **Prioritization**: Ability to identify and address critical issues first
 
 Good luck! Remember, the goal is to demonstrate your ability to investigate, solve, and clearly explain technical issues.
