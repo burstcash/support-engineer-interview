@@ -1,4 +1,4 @@
-# Support Engineer Technical Interview Challenge
+# Technical Interview Challenge
 
 ## Overview
 
