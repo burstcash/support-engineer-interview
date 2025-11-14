@@ -75,19 +75,6 @@ npm run db:delete-user    # Delete specific user
 
 Below are customer-reported issues in ticket format. Each requires investigation and resolution.
 
-### UI Issues
-
-**Ticket UI-101: Dark Mode Text Visibility**
-
-- **Reporter**: Sarah Chen
-- **Priority**: Medium
-- **Description**: "When using dark mode, the text I type into forms appears white on a white background, making it impossible to see what I'm typing."
-- **Steps to Reproduce**:
-  1. Enable dark mode
-  2. Navigate to any input form
-  3. Start typing
-- **Expected**: Text should be clearly visible against the background
-- **Actual**: Text is white on white background
 
 ### Validation Issues
 

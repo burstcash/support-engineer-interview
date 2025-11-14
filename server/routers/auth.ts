@@ -6,8 +6,11 @@ import { publicProcedure, router } from "../trpc";
 import { db } from "@/lib/db";
 import { users, sessions } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { encryptSensitiveData } from "@/lib/crypto";
 
-export const authRouter = router({
+export function createAuthRouter(dbConnection = db) {
+  console.log('Creating auth router with dbConnection:', dbConnection === db ? 'DEFAULT DB' : 'CUSTOM DB')
+  return router({
   signup: publicProcedure
     .input(
       z.object({
@@ -25,7 +28,9 @@ export const authRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const existingUser = await db.select().from(users).where(eq(users.email, input.email)).get();
+      console.log('Signup mutation: checking for existing user with email:', input.email)
+      const existingUser = await dbConnection.select().from(users).where(eq(users.email, input.email)).get();
+      console.log('Existing user found:', !!existingUser)
 
       if (existingUser) {
         throw new TRPCError({
@@ -35,14 +40,16 @@ export const authRouter = router({
       }
 
       const hashedPassword = await bcrypt.hash(input.password, 10);
+      const encryptedSSN = encryptSensitiveData(input.ssn);
 
-      await db.insert(users).values({
+      await dbConnection.insert(users).values({
         ...input,
+        ssn: encryptedSSN,
         password: hashedPassword,
       });
 
       // Fetch the created user
-      const user = await db.select().from(users).where(eq(users.email, input.email)).get();
+      const user = await dbConnection.select().from(users).where(eq(users.email, input.email)).get();
 
       if (!user) {
         throw new TRPCError({
@@ -59,7 +66,7 @@ export const authRouter = router({
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7);
 
-      await db.insert(sessions).values({
+      await dbConnection.insert(sessions).values({
         userId: user.id,
         token,
         expiresAt: expiresAt.toISOString(),
@@ -72,7 +79,7 @@ export const authRouter = router({
         (ctx.res as Headers).set("Set-Cookie", `session=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=604800`);
       }
 
-      return { user: { ...user, password: undefined }, token };
+      return { user: { ...user, password: undefined, ssn: undefined }, token };
     }),
 
   login: publicProcedure
@@ -83,7 +90,7 @@ export const authRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const user = await db.select().from(users).where(eq(users.email, input.email)).get();
+      const user = await dbConnection.select().from(users).where(eq(users.email, input.email)).get();
 
       if (!user) {
         throw new TRPCError({
@@ -105,10 +112,12 @@ export const authRouter = router({
         expiresIn: "7d",
       });
 
+      await dbConnection.delete(sessions).where(eq(sessions.userId, user.id)); // Clear existing session
+
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7);
 
-      await db.insert(sessions).values({
+      await dbConnection.insert(sessions).values({
         userId: user.id,
         token,
         expiresAt: expiresAt.toISOString(),
@@ -120,7 +129,7 @@ export const authRouter = router({
         (ctx.res as Headers).set("Set-Cookie", `session=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=604800`);
       }
 
-      return { user: { ...user, password: undefined }, token };
+      return { user: { ...user, password: undefined , ssn: undefined }, token };
     }),
 
   logout: publicProcedure.mutation(async ({ ctx }) => {
@@ -128,8 +137,10 @@ export const authRouter = router({
       // Delete session from database
       let token: string | undefined;
       if ("cookies" in ctx.req) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         token = (ctx.req as any).cookies.session;
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const cookieHeader = ctx.req.headers.get?.("cookie") || (ctx.req.headers as any).cookie;
         token = cookieHeader
           ?.split("; ")
@@ -137,7 +148,7 @@ export const authRouter = router({
           ?.split("=")[1];
       }
       if (token) {
-        await db.delete(sessions).where(eq(sessions.token, token));
+        await dbConnection.delete(sessions).where(eq(sessions.token, token));
       }
     }
 
@@ -149,4 +160,7 @@ export const authRouter = router({
 
     return { success: true, message: ctx.user ? "Logged out successfully" : "No active session" };
   }),
-});
+  });
+}
+
+export const authRouter = createAuthRouter();
