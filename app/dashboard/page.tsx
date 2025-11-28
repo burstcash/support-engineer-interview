@@ -29,8 +29,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <nav className="bg-white dark:bg-gray-800 shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
@@ -39,7 +39,7 @@ export default function DashboardPage() {
             <div className="flex items-center">
               <button
                 onClick={handleLogout}
-                className="ml-4 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                className="ml-4 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100"
               >
                 Sign Out
               </button>
@@ -51,21 +51,21 @@ export default function DashboardPage() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Accounts</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Your Accounts</h2>
 
             {accounts && accounts.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {accounts.map((account) => (
                   <div
                     key={account.id}
-                    className="bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition"
+                    className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg cursor-pointer hover:shadow-lg transition"
                     onClick={() => setSelectedAccountId(account.id)}
                   >
                     <div className="px-4 py-5 sm:p-6">
                       <dt className="text-sm font-medium text-gray-500 truncate">
                         {account.accountType.charAt(0).toUpperCase() + account.accountType.slice(1)} Account
                       </dt>
-                      <dd className="mt-1 text-3xl font-semibold text-gray-900">{formatCurrency(account.balance)}</dd>
+                      <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(account.balance)}</dd>
                       <dd className="mt-1 text-sm text-gray-500">Account: ****{account.accountNumber.slice(-4)}</dd>
                       <dd className="mt-1 text-sm text-gray-500">
                         Status:{" "}

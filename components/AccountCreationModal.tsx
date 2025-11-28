@@ -28,12 +28,12 @@ export function AccountCreationModal({ onClose, onSuccess }: AccountCreationModa
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Open New Account</h3>
+      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Open New Account</h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Account Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-200">Account Type</label>
             <div className="space-y-2">
               <label className="flex items-center">
                 <input
@@ -58,20 +58,20 @@ export function AccountCreationModal({ onClose, onSuccess }: AccountCreationModa
             </div>
           </div>
 
-          {error && <div className="text-sm text-red-600">{error}</div>}
+          {error && <div className="text-sm text-red-600 dark:text-red-200">{error}</div>}
 
           <div className="flex justify-end space-x-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={createAccountMutation.isPending}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-600"
             >
               {createAccountMutation.isPending ? "Creating..." : "Create Account"}
             </button>
