@@ -59,6 +59,7 @@ export default function SignupPage() {
       setError("");
       await signupMutation.mutateAsync(data);
       router.push("/dashboard");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     }

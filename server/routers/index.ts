@@ -7,4 +7,6 @@ export const appRouter = router({
   account: accountRouter,
 });
 
+// -- This extracts the type from the actual router implementation (appRouter) without
+// -- exporting the implementation itself
 export type AppRouter = typeof appRouter;

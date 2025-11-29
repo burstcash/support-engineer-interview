@@ -7,11 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "echo 'Please configure your test runner'",
-    "db:list-users": "node scripts/db-utils.js list-users",
-    "db:list-sessions": "node scripts/db-utils.js list-sessions",
-    "db:clear": "node scripts/db-utils.js clear",
-    "db:delete-user": "node scripts/db-utils.js delete-user"
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "db:list-users": "tsx scripts/db-utils.ts list-users",
+    "db:list-sessions": "tsx scripts/db-utils.ts list-sessions",
+    "db:clear": "tsx scripts/db-utils.ts clear",
+    "db:delete-user": "tsx scripts/db-utils.ts delete-user",
+    "db:backup-db": "tsx scripts/db-utils.ts backup-db",
+    "db:migrate-ssns": "tsx scripts/db-utils.ts migrate-ssns"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.79.0",
@@ -44,6 +49,7 @@
     "eslint-config-next": "15.3.3",
     "tailwindcss": "^4",
     "tsx": "^4.19.4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }
